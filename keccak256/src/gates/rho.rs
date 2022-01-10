@@ -6,7 +6,7 @@ use crate::gates::{
 };
 
 use halo2::{
-    circuit::{Cell, Layouter, Region},
+    circuit::{Cell, Layouter},
     plonk::{Advice, Column, ConstraintSystem, Error, TableColumn},
 };
 use itertools::Itertools;
@@ -90,20 +90,24 @@ impl<F: FieldExt> RhoConfig<F> {
 
     pub fn assign_region(
         &self,
-        region: &mut Region<'_, F>,
-        offset: usize,
+        layouter: &mut impl Layouter<F>,
         next_state: [(Cell, F); 25],
     ) -> Result<(), Error> {
-        for (idx, next_lane) in next_state.iter().enumerate() {
-            let cell = region.assign_advice(
-                || "lane next row",
-                self.state[idx],
-                offset + 1,
-                || Ok(next_lane.1),
-            )?;
-            region.constrain_equal(cell, next_lane.0)?;
-        }
-        Ok(())
+        layouter.assign_region(
+            || "assign output state",
+            |mut region| {
+                for (idx, next_lane) in next_state.iter().enumerate() {
+                    let cell = region.assign_advice(
+                        || "lane next row",
+                        self.state[idx],
+                        0,
+                        || Ok(next_lane.1),
+                    )?;
+                    region.constrain_equal(cell, next_lane.0)?;
+                }
+                Ok(())
+            },
+        )
     }
 
     pub fn load(&self, layouter: &mut impl Layouter<F>) -> Result<(), Error> {
@@ -202,19 +206,8 @@ mod tests {
                 let next_state =
                     config.assign_rotation_checks(&mut layouter, state)?;
                 assert_eq!(next_state.map(|lane| lane.1), self.out_state);
-                layouter.assign_region(
-                    || "assign output state",
-                    |mut region| {
-                        let offset = 1;
-                        config.assign_region(
-                            &mut region,
-                            offset,
-                            next_state,
-                        )?;
-                        Ok(())
-                    },
-                )?;
-                Ok(())
+
+                config.assign_region(&mut layouter, next_state)
             }
         }
 
