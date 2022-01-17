@@ -21,6 +21,7 @@ mod begin_tx;
 mod bitwise;
 mod byte;
 mod call;
+mod caller;
 mod coinbase;
 mod comparator;
 mod dup;
@@ -43,6 +44,7 @@ use begin_tx::BeginTxGadget;
 use bitwise::BitwiseGadget;
 use byte::ByteGadget;
 use call::CallGadget;
+use caller::CallerGadget;
 use coinbase::CoinbaseGadget;
 use comparator::ComparatorGadget;
 use dup::DupGadget;
@@ -90,6 +92,7 @@ pub(crate) struct ExecutionConfig<F> {
     begin_tx_gadget: BeginTxGadget<F>,
     byte_gadget: ByteGadget<F>,
     call_gadget: CallGadget<F>,
+    caller_gadget: CallerGadget<F>,
     comparator_gadget: ComparatorGadget<F>,
     dup_gadget: DupGadget<F>,
     error_oog_pure_memory_gadget: ErrorOOGPureMemoryGadget<F>,
@@ -219,6 +222,7 @@ impl<F: FieldExt> ExecutionConfig<F> {
             begin_tx_gadget: configure_gadget!(),
             byte_gadget: configure_gadget!(),
             call_gadget: configure_gadget!(),
+            caller_gadget: configure_gadget!(),
             comparator_gadget: configure_gadget!(),
             dup_gadget: configure_gadget!(),
             error_oog_pure_memory_gadget: configure_gadget!(),
@@ -512,6 +516,7 @@ impl<F: FieldExt> ExecutionConfig<F> {
             ExecutionState::PUSH => assign_exec_step!(self.push_gadget),
             ExecutionState::DUP => assign_exec_step!(self.dup_gadget),
             ExecutionState::SWAP => assign_exec_step!(self.swap_gadget),
+            ExecutionState::CALLER => assign_exec_step!(self.caller_gadget),
             ExecutionState::COINBASE => assign_exec_step!(self.coinbase_gadget),
             ExecutionState::CALL => assign_exec_step!(self.call_gadget),
             ExecutionState::ErrorOutOfGasPureMemory => {
