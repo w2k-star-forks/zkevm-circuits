@@ -64,6 +64,8 @@ mod evm_circ_benches {
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
     use std::env::var;
+    use std::fs::{self, File};
+    use {pprof::protos::Message, std::io::Write};
 
     #[cfg_attr(not(feature = "benches"), ignore)]
     #[test]
@@ -79,12 +81,26 @@ mod evm_circ_benches {
             0x32, 0x54, 0x06, 0xbc, 0xe5,
         ]);
 
+        let guard = pprof::ProfilerGuard::new(100).unwrap();
         // Bench setup generation
         let setup_message =
             format!("Setup generation with degree = {}", degree);
         let start1 = start_timer!(|| setup_message);
         let params = Setup::<Bn256>::new(degree, rng);
         end_timer!(start1);
+
+        if let Ok(report) = guard.report().build() {
+            let file = File::create("setup_flamegraph.svg").unwrap();
+            report.flamegraph(file).unwrap();
+
+            let mut file = File::create("setup_profile.pb").unwrap();
+            let profile = report.pprof().unwrap();
+            let mut content = Vec::new();
+            profile.encode(&mut content).unwrap();
+            file.write_all(&content).unwrap();
+            println!("report proof of setup");
+        }
+        drop(guard);
 
         let vk = keygen_vk(&params, &circuit).unwrap();
         let pk = keygen_pk(&params, vk, &circuit).unwrap();
@@ -93,6 +109,7 @@ mod evm_circ_benches {
         let mut transcript =
             Blake2bWrite::<_, _, Challenge255<_>>::init(vec![]);
 
+        let guard = pprof::ProfilerGuard::new(100).unwrap();
         // Bench proof generation time
         let proof_message =
             format!("EVM Proof generation with {} rows", degree);
@@ -101,6 +118,20 @@ mod evm_circ_benches {
             .unwrap();
         let proof = transcript.finalize();
         end_timer!(start2);
+
+        if let Ok(report) = guard.report().build() {
+            let file = File::create("proof_flamegraph.svg").unwrap();
+            report.flamegraph(file).unwrap();
+
+            let mut file = File::create("proof_profile.pb").unwrap();
+            let profile = report.pprof().unwrap();
+
+            let mut content = Vec::new();
+            profile.encode(&mut content).unwrap();
+            file.write_all(&content).unwrap();
+
+            println!("report profile of proof");
+        };
 
         // Verify
         let params = Setup::<Bn256>::verifier_params(&params, 0).unwrap();
