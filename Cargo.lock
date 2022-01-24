@@ -1813,7 +1813,7 @@ checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
 [[package]]
 name = "halo2"
 version = "0.1.0-beta.1"
-source = "git+https://github.com/appliedzkp/halo2.git?rev=b78c39cacc1c79d287032f1b5f94beb661b3fb42#b78c39cacc1c79d287032f1b5f94beb661b3fb42"
+source = "git+https://github.com/appliedzkp/halo2.git?branch=feat/introduce-assembly#c5a2fea0caefa80262bf4c96081a2a387b582228"
 dependencies = [
  "blake2b_simd",
  "ff 0.11.0",
@@ -2527,7 +2527,7 @@ dependencies = [
 [[package]]
 name = "pairing_bn256"
 version = "0.1.0"
-source = "git+https://github.com/appliedzkp/pairing#18f6e63242922c4845347623cd440b9ac9ecc040"
+source = "git+https://github.com/appliedzkp/pairing?branch=introduce-assembly-complete#47c6854d6682d0704f43667926a70b2186c1c40a"
 dependencies = [
  "ff 0.11.0",
  "group 0.11.0",

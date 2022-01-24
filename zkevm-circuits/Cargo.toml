@@ -8,8 +8,8 @@ edition = "2018"
 
 [dependencies]
 ff = "0.11"
-halo2 = { git = "https://github.com/appliedzkp/halo2.git", rev = "b78c39cacc1c79d287032f1b5f94beb661b3fb42" }
-pairing = { git = 'https://github.com/appliedzkp/pairing', package = "pairing_bn256" }
+halo2 = { git = "https://github.com/appliedzkp/halo2.git", branch = "feat/introduce-assembly" }
+pairing = { git = 'https://github.com/appliedzkp/pairing', package = "pairing_bn256", branch = "introduce-assembly-complete" }
 bigint = "4"
 num = "0.4"
 sha3 = "0.7.2"
