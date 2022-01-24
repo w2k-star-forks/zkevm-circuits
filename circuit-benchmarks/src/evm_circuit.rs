@@ -53,18 +53,15 @@ impl<F: FieldExt> Circuit<F> for TestCircuit<F> {
 mod evm_circ_benches {
     use super::*;
     use ark_std::{end_timer, start_timer};
-    use halo2::plonk::{create_proof, keygen_pk, keygen_vk};
     use halo2::{
-        plonk::verify_proof,
+        plonk::{create_proof, keygen_pk, keygen_vk, verify_proof},
         poly::commitment::Setup,
         transcript::{Blake2bRead, Blake2bWrite, Challenge255},
     };
-    use pairing::bn256::Bn256;
-    use pairing::bn256::Fr;
+    use pairing::bn256::{Bn256, Fr};
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
-    use std::env::var;
-    use std::fs::{self, File};
+    use std::{env::var, fs::File};
     use {pprof::protos::Message, std::io::Write};
 
     #[cfg_attr(not(feature = "benches"), ignore)]
@@ -120,10 +117,10 @@ mod evm_circ_benches {
         end_timer!(start2);
 
         if let Ok(report) = guard.report().build() {
-            let file = File::create("proof_flamegraph.svg").unwrap();
+            let file = File::create("create_proof_flamegraph.svg").unwrap();
             report.flamegraph(file).unwrap();
 
-            let mut file = File::create("proof_profile.pb").unwrap();
+            let mut file = File::create("create_proof_profile.pb").unwrap();
             let profile = report.pprof().unwrap();
 
             let mut content = Vec::new();

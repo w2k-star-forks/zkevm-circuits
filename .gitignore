@@ -1,3 +1,9 @@
 /target
 *.png
 .DS_Store
+
+# flame grahp
+*_flamegraph.svg
+
+# pprof
+*_profile.pb

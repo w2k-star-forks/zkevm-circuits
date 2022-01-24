@@ -27,4 +27,3 @@ jobs:
           ssh prover "bash -s" -- < .github/proverCiScripts/getSysstat.sh "${{ env.PR_NUMBER }}"
       - run: .github/proverCiScripts/shutdownProver.sh
         shell: bash
-
