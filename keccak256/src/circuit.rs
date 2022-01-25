@@ -3,6 +3,7 @@ use super::gates::{
     state_conversion::StateBaseConversion, tables::FromBase9TableConfig,
     theta::ThetaConfig, xi::XiConfig,
 };
+use crate::gates::gate_helpers::*;
 use crate::{
     arith_helpers::*,
     common::{ABSORB_NEXT_INPUTS, PERMUTATION, ROUND_CONSTANTS},
@@ -15,6 +16,7 @@ use halo2::{
     poly::Rotation,
 };
 use itertools::Itertools;
+use num_bigint::BigUint;
 use pairing::arithmetic::FieldExt;
 use std::convert::TryInto;
 
@@ -166,7 +168,7 @@ impl<F: FieldExt> KeccakFConfig<F> {
         let mut state = in_state;
 
         // First 23 rounds
-        for round in 0..PERMUTATION {
+        for round in 0..PERMUTATION - 1 {
             // State in base-13
             // theta
             state = {
@@ -179,12 +181,13 @@ impl<F: FieldExt> KeccakFConfig<F> {
                 self.theta_config.assign_state(layouter, state, out_state)?
             };
 
+            println!("Iter: {}, State after Theta: {:#?}", round, state);
+
             // rho
             state = {
                 // assignment
                 let next_state =
                     self.rho_config.assign_rotation_checks(layouter, state)?;
-                self.rho_config.assign_region(layouter, next_state)?;
                 next_state
             };
             // Outputs in base-9 which is what Pi requires
@@ -233,11 +236,26 @@ impl<F: FieldExt> KeccakFConfig<F> {
                     },
                 )?;
 
-                self.base_conversion_config.assign_region(
+                for (idx, (cell, lane)) in state.iter().enumerate() {
+                    println!("idx {:?} lane {:?}", idx, lane);
+                }
+
+                let out_state = self.base_conversion_config.assign_region(
                     layouter,
                     state,
                     activation_flag,
-                )?
+                )?;
+                for (idx, lane) in out_state.iter().enumerate() {
+                    assert!(
+                        f_to_biguint::<F>(lane.1)
+                            .lt(&BigUint::from(B13 as u64).pow(64)),
+                        "index {} lane {:?}",
+                        idx,
+                        lane.1
+                    );
+                }
+
+                out_state
             }
         }
 
@@ -335,7 +353,6 @@ mod tests {
     use pretty_assertions::assert_eq;
     use std::convert::TryInto;
 
-    #[ignore]
     #[test]
     fn test_keccak_round() {
         #[derive(Default)]

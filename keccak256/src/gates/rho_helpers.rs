@@ -137,7 +137,7 @@ pub struct RhoLane {
 impl RhoLane {
     pub fn new(input: BigUint, rotation: u32) -> Self {
         assert!(
-            input.lt(&BigUint::from(B13).pow(RHO_LANE_SIZE as u32)),
+            input.lt(&BigUint::from(B13).pow((RHO_LANE_SIZE) as u32)),
             "lane too big"
         );
         let mut chunks = input.to_radix_le(B13.into());

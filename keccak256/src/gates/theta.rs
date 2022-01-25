@@ -1,10 +1,12 @@
 use crate::arith_helpers::*;
+use crate::gates::gate_helpers::*;
 use halo2::{
     circuit::{Cell, Layouter},
     plonk::{Advice, Column, ConstraintSystem, Error, Expression, Selector},
     poly::Rotation,
 };
 use itertools::Itertools;
+use num_bigint::BigUint;
 use pairing::arithmetic::FieldExt;
 use std::convert::TryInto;
 use std::marker::PhantomData;
@@ -77,6 +79,17 @@ impl<F: FieldExt> ThetaConfig<F> {
                 self.q_enable.enable(&mut region, offset)?;
 
                 for (idx, lane) in state.iter().enumerate() {
+                    // base 10      2 chunks  -> 0 ~99 -> 10**2 - 1
+                    // base 13      64 chunks -> 13**64 - 1
+
+                    assert!(
+                        f_to_biguint::<F>(lane.1)
+                            .lt(&BigUint::from(B13 as u64).pow(64)),
+                        "index {} lane {:?}",
+                        idx,
+                        lane.1
+                    );
+
                     let obtained_cell = region.assign_advice(
                         || format!("assign state {}", idx),
                         self.state[idx],
