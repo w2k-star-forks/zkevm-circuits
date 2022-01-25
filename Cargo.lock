@@ -1822,7 +1822,7 @@ checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
 [[package]]
 name = "halo2"
 version = "0.1.0-beta.1"
-source = "git+https://github.com/appliedzkp/halo2.git?branch=feat/optimized-asm#276c6cd6a154807e85a4f93e1cf1a5e18b8b3ddd"
+source = "git+https://github.com/appliedzkp/halo2.git?branch=feat/optimized-asm#4d470eccd37ccb03b5d55c60d0044d4df26a1739"
 dependencies = [
  "blake2b_simd",
  "ff 0.11.0",
